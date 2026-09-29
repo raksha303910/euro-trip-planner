@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Smart Itinerary Engine & Transit Hub</title>
+    <!-- Core Application Font Styles -->
+    <link rel="stylesheet" href="https://cloudflare.com">
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="bg-[#0b0f19] text-slate-200 font-sans antialiased min-h-screen">
+
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-5 mb-6 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold tracking-tight text-white flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-blue-500"></i>AI Intelligent Travel Architect
+                </h1>
+                <p class="text-slate-400 mt-1">Dynamic schedules, weather clothing analyzer, currency converter, and live DB tracking.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="exportFullItinerary()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium text-sm transition shadow flex items-center gap-2">
+                    <i class="fa-solid fa-file-export"></i> Export Schedule Text
+                </button>
+                <button onclick="clearSystemData()" class="bg-red-950/40 hover:bg-red-950/60 border border-red-900/50 text-red-400 px-4 py-2 rounded-lg font-medium text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i> Reset Engine
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace Split -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Command Panel -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-[#131b2e] rounded-xl border border-slate-800 p-5 shadow-xl space-y-4">
+                    <h3 class="font-bold text-sm text-white uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-blue-400"></i> Parameter Configuration
+                    </h3>
+                    
+                    <!-- Searchable European Destination Input -->
+                    <div class="relative">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Destination Target</label>
+                        <input type="text" id="param-place" oninput="filterCitiesMenu()" onfocus="showCitiesMenu()" placeholder="Type to search European cities..." class="w-full text-sm bg-[#0b0f19] border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        
+                        <!-- Dropdown list populated in script -->
+                        <div id="cities-dropdown" class="absolute left-0 right-0 mt-1 bg-[#131b2e] border border-slate-700 rounded-lg shadow-2xl max-h-60 overflow-y-auto hidden z-50 divide-y divide-slate-800"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Start Date</label>
+                            <input type="date" id="param-start" class="w-full text-sm bg-[#0b0f19] border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">End Date</label>
+                            <input type="date" id="param-end" class="w-full text-sm bg-[#0b0f19] border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Primary Lodging / Stay Address</label>
+                        <input type="text" id="param-stay" placeholder="Hotel name or street zone" class="w-full text-sm bg-[#0b0f19] border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Budget Ceiling (€)</label>
+                            <input type="number" id="param-budget" placeholder="1000" class="w-full text-sm bg-[#0b0f19] border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Travel Style / Interest</label>
+                            <select id="param-interests" class="w-full text-sm bg-[#0b0f19] border border-slate-700 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="Culture">Culture & History</option>
+                                <option value="Adventure">Adventure & Nature</option>
+                                <option value="Foodie">Culinary / Foodie</option>
+                                <option value="Relaxed">Leisure & Relaxed</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button onclick="generateSmartItinerary()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm py-3 rounded-lg transition shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-gears"></i> Synthesize Smart Schedule
+                    </button>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <div class="bg-[#131b2e] rounded-xl border border-slate-800/80 p-2 shadow-xl space-y-1">
+                    <button onclick="toggleWorkspace('itinerary')" id="anchor-itinerary" class="anchor-btn w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition bg-blue-600 text-white">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-calendar-week"></i> Generated Schedule Matrix</span>
+                        <i class="fa-solid fa-chevron-right text-xs opacity-50"></i>
+                    </button>
+                    <button onclick="toggleWorkspace('transit')" id="anchor-transit" class="anchor-btn w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:bg-slate-800/50">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-train-subway"></i> DB Navigator Live Tracking</span>
+                        <i class="fa-solid fa-chevron-right text-xs opacity-50"></i>
+                    </button>
+                    <button onclick="toggleWorkspace('currency')" id="anchor-currency" class="anchor-btn w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:bg-slate-800/50">
+                        <span class="flex items-center gap-3"><i class="fa-solid fa-money-bill-transfer"></i> Multi-Currency Conversion</span>
+                        <i class="fa-solid fa-chevron-right text-xs opacity-50"></i>
+                    </button>
+                </div>
+
+                <!-- Budget Analytics -->
+                <div class="bg-gradient-to-br from-slate-900 to-slate-950 rounded-xl p-5 text-white border border-slate-800 shadow-xl space-y-3">
+                    <span class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Live Financial Status Ledger</span>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="block text-xs text-slate-400">Allocated Spending</span>
+                            <span id="meta-allocated-cost" class="text-xl font-bold text-emerald-400">€0.00</span>
+                        </div>
+                        <div>
+                            <span class="block text-xs text-slate-400">Target Ceiling</span>
+                            <span id="meta-ceiling-cost" class="text-xl font-bold text-slate-300">€0.00</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div id="meta-budget-bar" class="bg-blue-500 h-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Workspace Panel -->
+            <div class="lg:col-span-8 space-y-6">
+
+                <!-- VIEW: SCHEDULER MATRIX & CLOTHING DATA -->
+                <div id="view-itinerary" class="workspace-panel block space-y-6">
+                    <div id="fallback-itinerary-msg" class="bg-[#131b2e] rounded-xl border border-slate-800 p-8 text-center space-y-3">
+                        <i class="fa-solid fa-map-location-dot text-4xl text-slate-600 block"></i>
+                        <h3 class="text-lg font-bold text-white">No Target Configuration Initialized</h3>
+                        <p class="text-sm text-slate-400 max-w-md mx-auto">Fill in your destination parameters, trip timeline dates, and interests on the left panel to execute your customized, responsive itinerary.</p>
